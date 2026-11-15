@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8fb">
+  <meta name="description" content="코흐 눈송이를 한 단계씩 부드럽게 확대하며 자기유사성을 살펴본다.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>직접 확대해 보기 | 코흐 눈송이 탐험</title>
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="vendor/katex/katex.min.js" defer></script>
+  <script src="js/math-renderer.js" defer></script>
+  <script src="js/koch-engine.js" defer></script>
+  <script src="js/simulator.js" defer></script>
+</head>
+<body data-page="zoom">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="코흐 눈송이 탐험 첫 화면">
+        <span class="brand-mark" aria-hidden="true">❄</span>
+        <span>코흐 눈송이 탐험</span>
+      </a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="index.html">코흐 곡선이란?</a>
+        <a href="limits.html">넓이와 길이의 극한</a>
+        <a href="zoom.html" aria-current="page"><span class="nav-label-full">직접 확대해 보기</span><span class="nav-label-short">직접 확대</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell zoom-page">
+    <header class="page-intro">
+      <p class="eyebrow">한 번에 한 단계씩</p>
+      <h1>직접 확대해 보기</h1>
+      <p>곡선 위를 누르면 가장 가까운 곡선 점을 표시하고, 그 점을 향해 3배 확대한다. 확대는 매 프레임 곡선을 다시 그려 부드럽게 진행된다.</p>
+    </header>
+
+    <div class="simulator-grid">
+      <section class="simulator-main" aria-label="코흐 눈송이 확대 시뮬레이터">
+        <p id="start-stage" class="start-stage">처음 화면은 단계 <span id="start-stage-value" class="math-inline" data-math="n_0=6"></span>에서 시작한다.</p>
+        <div class="canvas-frame">
+          <canvas id="koch-canvas" class="koch-canvas" role="img"
+            aria-label="클릭한 곡선 지점을 중심으로 단계별 확대를 살펴보는 코흐 눈송이 그림"></canvas>
+        </div>
+        <p id="self-similarity-caption" class="self-similarity-caption" hidden>
+          3배 확대 뒤 같은 모양이 다시 나타난다 — 자기유사성
+        </p>
+        <div class="canvas-controls" aria-label="시뮬레이션 조작">
+          <button id="zoom-out" class="button button-secondary" type="button" disabled>◀ 이전 단계</button>
+          <button id="next-step" class="button button-primary" type="button">다음 단계 ▶</button>
+          <button id="reset-view" class="button button-secondary" type="button" disabled>처음으로</button>
+          <label class="toggle-control">
+            <input id="fill-toggle" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+            <span>내부 채우기</span>
+          </label>
+        </div>
+        <p id="sim-status" class="visually-hidden" aria-live="polite">시뮬레이션을 준비한다.</p>
+        <p class="canvas-hint">그림을 눌러 확대할 수 있다. 확대 중에는 다음 조작을 잠시 기다린다.</p>
+      </section>
+
+      <aside class="stage-panel" aria-label="현재 단계의 수학 정보">
+        <p class="panel-kicker">현재 관찰 단계</p>
+        <div id="stage-badge" class="stage-badge" aria-live="polite">
+          <span>확대 </span><span id="stage-zoom-count" class="math-inline" data-math="0"></span><span>번 · 배율 </span>
+          <span id="stage-scale" class="math-inline" data-math="1"></span><span> · 단계 </span>
+          <span id="stage-index" class="math-inline" data-math="0"></span>
+        </div>
+
+        <section class="formula-card">
+          <h2>둘레</h2>
+          <p class="formula-main math-display" data-math="P_n=3\left(\frac{4}{3}\right)^n"></p>
+          <div id="perimeter-current" class="formula-current math-display" data-math="P_0=3"></div>
+          <p class="formula-note">공비 <span class="math-inline" data-math="\frac{4}{3}>1"></span>이므로 둘레는 발산한다.</p>
+        </section>
+
+        <section class="formula-card area-card">
+          <h2>넓이</h2>
+          <p class="formula-line math-display" data-math="\Delta A_n=\frac{A_0}{3}\left(\frac{4}{9}\right)^{n-1}"></p>
+          <p class="area-general math-display" data-math="\begin{aligned}A_n&=\frac{8}{5}A_0\\&-\frac{3}{5}A_0\left(\frac{4}{9}\right)^n\end{aligned}"></p>
+          <p id="area-current" class="area-current math-display" data-math="\begin{aligned}A_0&=\frac{8}{5}A_0-\frac{3}{5}A_0\\&\approx 0.692820\end{aligned}"></p>
+          <p id="area-ratio" class="area-ratio math-display" data-math="\frac{A_0}{A_0}\approx 1.600000"></p>
+          <p class="area-limit math-display" data-math="\frac{8}{5}=1.600000"></p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner"><span>코흐 눈송이 탐험</span><span>수열과 무한등비급수로 읽는 프랙탈</span></div>
+  </footer>
+</body>
+</html>
