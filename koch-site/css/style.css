@@ -1,0 +1,740 @@
+/* 코흐 눈송이 탐험 — 스타일 (B안)
+   레이아웃: 헤더·본문·푸터가 같은 폭(--wrap)과 같은 좌우 여백(--pad)을 공유한다.
+   글 카드는 왼쪽 제목 열 + 오른쪽 내용 열의 2단이고, 900px 이하에서 1단이 된다.
+   JS가 읽는 변수(--blue, --orange, --surface-soft, --border, --text-muted, --canvas-bg)는 이름을 유지한다. */
+
+:root {
+  color-scheme: light;
+  --wrap: 1120px;
+  --pad: 24px;
+  --head-col: 14rem;
+
+  --bg: #f3f7fa;
+  --surface: #ffffff;
+  --surface-soft: #e9f1f6;
+  --text: #13273a;
+  --text-muted: #465d6e;
+  --border: #d2dde5;
+  --border-strong: #72879a;
+
+  --blue: #0072b2;
+  --blue-strong: #005a8c;
+  --on-blue: #ffffff;
+  --orange: #d55e00;
+  --orange-text: #9c4300;
+  --orange-soft: #fff0e4;
+  --conclusion-bg: #e4f0f8;
+  --conclusion-border: #a9cde4;
+
+  --canvas-bg: #fbfdff;
+  --canvas-grid: rgba(44, 91, 120, 0.09);
+  --fill: #cfe4f1;
+
+  --shadow: 0 1px 2px rgba(19, 39, 58, 0.05), 0 12px 32px rgba(19, 39, 58, 0.07);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --font: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d1720;
+    --surface: #15232e;
+    --surface-soft: #1c2e3b;
+    --text: #ebf3f8;
+    --text-muted: #aebfcb;
+    --border: #2c4050;
+    --border-strong: #6c8597;
+    --blue: #56b4e9;
+    --blue-strong: #8dcff3;
+    --on-blue: #08161f;
+    --orange: #f0a26e;
+    --orange-text: #f4b080;
+    --orange-soft: #33261d;
+    --conclusion-bg: #1a3345;
+    --conclusion-border: #36607d;
+    --canvas-bg: #111e28;
+    --canvas-grid: rgba(175, 208, 227, 0.1);
+    --fill: #24445a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.28);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1720;
+  --surface: #15232e;
+  --surface-soft: #1c2e3b;
+  --text: #ebf3f8;
+  --text-muted: #aebfcb;
+  --border: #2c4050;
+  --border-strong: #6c8597;
+  --blue: #56b4e9;
+  --blue-strong: #8dcff3;
+  --on-blue: #08161f;
+  --orange: #f0a26e;
+  --orange-text: #f4b080;
+  --orange-soft: #33261d;
+  --conclusion-bg: #1a3345;
+  --conclusion-border: #36607d;
+  --canvas-bg: #111e28;
+  --canvas-grid: rgba(175, 208, 227, 0.1);
+  --fill: #24445a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+* { box-sizing: border-box; }
+
+html { min-width: 320px; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.75;
+  /* 한글은 어절 단위로 줄을 바꾼다. 어절이 칸보다 길 때만 글자 사이에서 끊는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.katex, .katex * { word-break: normal; overflow-wrap: normal; }
+
+a { color: var(--blue-strong); }
+a:hover { text-decoration-thickness: 2px; }
+button, input { font: inherit; }
+button { color: inherit; }
+
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+.skip-link {
+  position: absolute;
+  z-index: 10;
+  top: 8px;
+  left: 8px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: var(--text);
+  color: var(--surface);
+  transform: translateY(-150%);
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ───── 공통 폭: 헤더·본문·푸터가 같은 선에 놓인다 ───── */
+.header-inner,
+.page-shell,
+.footer-inner {
+  width: 100%;
+  max-width: calc(var(--wrap) + 2 * var(--pad));
+  margin-inline: auto;
+  padding-left: max(var(--pad), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad), env(safe-area-inset-right, 0px));
+}
+
+.site-header {
+  position: relative;
+  z-index: 2;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.header-inner {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--blue);
+  color: var(--on-blue);
+  font-size: 20px;
+}
+
+.site-nav { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+.site-nav a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav a:hover { background: var(--surface-soft); color: var(--text); }
+.site-nav a[aria-current="page"] { background: var(--blue); color: var(--on-blue); }
+
+.page-shell { padding-block: 48px 80px; }
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--blue-strong);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+h1, h2, h3, p, figure { margin-top: 0; }
+h1, h2, h3 { line-height: 1.3; letter-spacing: -0.03em; text-wrap: balance; }
+h1 { margin-bottom: 14px; font-size: clamp(34px, 5vw, 54px); font-weight: 800; }
+h2 { margin-bottom: 12px; font-size: clamp(22px, 2.5vw, 28px); font-weight: 800; }
+h3 { margin-bottom: 8px; font-size: 18px; font-weight: 700; }
+p { margin-bottom: 16px; }
+
+.page-intro { max-width: 52rem; margin-bottom: 36px; }
+.page-intro > p:last-child { margin-bottom: 0; color: var(--text-muted); font-size: 18px; }
+
+/* ───── 글 카드: 제목 열 + 내용 열 ───── */
+.content-card {
+  display: grid;
+  grid-template-columns: minmax(0, var(--head-col)) minmax(0, 1fr);
+  column-gap: clamp(24px, 4vw, 48px);
+  margin: 0 0 20px;
+  padding: clamp(20px, 3.4vw, 36px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.card-head { min-width: 0; }
+.card-head h2 { margin-bottom: 0; }
+.card-body { min-width: 0; }
+.card-body > :first-child { margin-top: 0; }
+.card-body > :last-child { margin-bottom: 0; }
+.card-body > p { max-width: 46rem; }
+
+/* ───── 수식 ───── */
+.math-inline { display: inline-block; max-width: 100%; vertical-align: baseline; }
+.math-inline .katex { font-size: 1.12em; }
+
+.math-display {
+  max-width: 100%;
+  margin: 8px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.math-display .katex-display { margin: 0; text-align: left; }
+
+.formula-note {
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ───── 미리보기 카드(index) ───── */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 22px 0 0;
+}
+
+.preview-card {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.preview-canvas {
+  --surface-soft: var(--fill);
+  display: block;
+  width: 100%;
+  height: 150px;
+  background: var(--canvas-bg);
+}
+
+.preview-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 14px 13px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.preview-card figcaption strong { font-size: 16px; }
+.preview-card figcaption span { color: var(--text-muted); font-size: 14px; }
+.preview-card figcaption .katex { font-size: 1.28em; }
+
+/* ───── 특징 카드 ───── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.feature-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.feature-card h3 { font-size: 17px; }
+.feature-card p { margin: 0; color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+
+/* ───── 표 ───── */
+.table-wrap {
+  width: 100%;
+  margin: 20px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+th, td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th { background: var(--surface-soft); font-size: 15px; font-weight: 700; }
+td { font-size: 16px; }
+td .katex { font-size: 1.22em; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+tbody th { color: var(--blue-strong); }
+
+/* ───── 설명 상자 ───── */
+.math-callout {
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  font-weight: 600;
+}
+
+.equation-panel {
+  margin: 18px 0;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: clamp(17px, 2vw, 20px);
+}
+.equation-panel p { margin: 0 0 6px; }
+.equation-panel p:last-child { margin-bottom: 0; }
+.series-note { margin: 10px 0; color: var(--text); font-weight: 400; font-size: 16px; }
+
+.partial-sum { margin: 16px 0; }
+
+/* ───── 핵심 결론 카드(limits) ───── */
+.verdict-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0 0 20px;
+}
+
+.verdict, .limit-result {
+  --tone: var(--blue-strong);
+  --tone-soft: var(--surface-soft);
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.verdict-diverge, .limit-result:first-child { --tone: var(--orange-text); --tone-soft: var(--orange-soft); }
+
+.verdict-tag, .limit-result > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--tone-soft);
+  color: var(--tone);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+.verdict-diverge .verdict-tag::before { content: "↗"; }
+.verdict-converge .verdict-tag::before { content: "→"; }
+
+.verdict-math, .limit-result > strong { max-width: 100%; color: var(--tone); font-weight: 700; }
+.verdict-math { width: 100%; margin: 0; font-size: clamp(24px, 2.8vw, 32px); }
+.limit-result > strong { font-size: clamp(22px, 2.5vw, 28px); }
+.verdict-note { margin: 0; color: var(--text-muted); font-size: 15px; line-height: 1.6; }
+
+.limit-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 20px;
+}
+.limit-result { box-shadow: none; background: var(--bg); padding: 18px 20px; }
+
+.conclusion-card {
+  margin: 20px 0;
+  padding: 18px 22px 20px;
+  border: 1px solid var(--conclusion-border);
+  border-radius: var(--radius-lg);
+  background: var(--conclusion-bg);
+  color: var(--blue-strong);
+  font-size: clamp(19px, 2.4vw, 24px);
+}
+.conclusion-label {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--on-blue);
+  font-size: 14px;
+  font-weight: 800;
+}
+.conclusion-card .math-display { margin: 4px 0; }
+
+/* ───── 상호작용 영역 ───── */
+.button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button:hover:not(:disabled) { border-color: var(--blue-strong); color: var(--blue-strong); }
+.button:disabled {
+  border-style: dashed;
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.button-primary { border-color: var(--blue); background: var(--blue); color: var(--on-blue); }
+.button-primary:hover:not(:disabled) { border-color: var(--blue-strong); background: var(--blue-strong); color: var(--on-blue); }
+.button-primary:disabled { background: var(--surface-soft); color: var(--text-muted); }
+
+.text-link { display: inline-block; margin-top: 8px; font-weight: 700; }
+.limits-preview-card .button { margin-top: 16px; }
+
+.range-label { display: flex; justify-content: space-between; margin: 0 0 6px; font-weight: 700; }
+.range-label output { color: var(--blue-strong); }
+.stage-range { display: block; width: 100%; min-height: 34px; accent-color: var(--blue); cursor: pointer; }
+
+.graphs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.graph-card {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.graph-card figcaption { display: flex; flex-direction: column; margin: 0 0 4px; }
+.graph-card figcaption strong { color: var(--text); font-size: 16px; }
+.graph-card figcaption span { color: var(--text-muted); font-size: 14px; }
+.limit-graph { display: block; width: 100%; height: 235px; }
+
+.slider-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.slider-results > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.slider-results span { color: var(--text-muted); font-size: 15px; }
+.slider-results strong { color: var(--blue-strong); font-size: clamp(22px, 3vw, 28px); font-variant-numeric: tabular-nums; }
+
+.epsilon-tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 220px);
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.epsilon-tool > label { font-weight: 700; }
+.epsilon-tool > .math-display { grid-column: 1 / -1; margin: 4px 0; }
+.number-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.number-input:focus-visible { border-color: var(--blue); }
+.calculation-result { grid-column: 1 / -1; color: var(--text-muted); font-weight: 500; }
+
+/* ───── zoom 페이지 ───── */
+.simulator-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
+  align-items: start;
+  gap: 24px;
+}
+.simulator-main { min-width: 0; }
+@media (min-width: 901px) { .simulator-main { position: sticky; top: 16px; } }
+.zoom-page .page-intro { margin-bottom: 24px; }
+
+.start-stage { margin: 0 0 10px; color: var(--text-muted); font-size: 15px; font-weight: 600; }
+
+.canvas-frame {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--canvas-bg);
+  box-shadow: var(--shadow);
+}
+
+.koch-canvas {
+  --surface-soft: var(--fill);
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 640px;
+  background-color: var(--canvas-bg);
+  background-image:
+    linear-gradient(to right, var(--canvas-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--canvas-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.canvas-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 0 0; }
+.zoom-page .canvas-controls .toggle-control { margin-left: auto; }
+
+.toggle-control {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle-control input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.toggle-track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background-color 160ms ease;
+}
+.toggle-track::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  content: "";
+  transition: transform 160ms ease;
+}
+.toggle-control input:checked + .toggle-track { background: var(--blue); }
+.toggle-control input:checked + .toggle-track::after { transform: translateX(18px); }
+.toggle-control input:focus-visible + .toggle-track { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+.self-similarity-caption { margin: 12px 0 0; color: var(--orange-text); font-size: 15px; font-weight: 700; }
+.self-similarity-caption[hidden] { display: none; }
+.canvas-hint { margin: 12px 0 0; color: var(--text-muted); font-size: 15px; }
+
+.stage-panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.panel-kicker { margin-bottom: 8px; color: var(--text-muted); font-size: 15px; font-weight: 700; }
+
+.stage-badge {
+  margin-bottom: 16px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--blue-strong);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.stage-badge .katex { font-size: 1.08em; }
+
+.formula-card {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.formula-card:last-child { margin-bottom: 0; }
+.formula-card h2 { margin-bottom: 6px; font-size: 17px; }
+
+.formula-main { margin-bottom: 6px; color: var(--blue-strong); font-size: clamp(22px, 2.4vw, 26px); font-weight: 700; line-height: 1.35; }
+.formula-line { margin-bottom: 4px; font-size: 16px; line-height: 1.55; }
+.formula-current { margin: 0 0 6px; color: var(--text); font-size: 18px; font-weight: 600; line-height: 1.55; }
+.formula-card .formula-note { margin: 0; font-size: 15px; }
+
+.area-card { overflow: hidden; }
+.area-card .math-display { margin: 6px 0; overflow: visible; font-size: 17px; }
+.area-card .area-current, .area-card .area-ratio { color: var(--blue-strong); }
+.area-card .area-limit { color: var(--text-muted); }
+.area-card .katex { max-width: 100%; }
+
+.nav-label-short { display: none; }
+
+.site-footer { border-top: 1px solid var(--border); background: var(--surface); }
+.footer-inner {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.footer-inner span:first-child { color: var(--text); font-weight: 800; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ───── 반응형 ───── */
+@media (max-width: 900px) {
+  .content-card { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
+  .card-head { max-width: 40rem; }
+
+  /* zoom: 1열. 캔버스가 먼저, 수식 패널이 그 아래 */
+  .simulator-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .stage-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px 14px; }
+  .stage-panel .panel-kicker { grid-column: 1 / -1; margin: 0; }
+  .stage-panel .stage-badge { grid-column: 1 / -1; margin: 0; }
+  .stage-panel .formula-card { margin: 0; }
+}
+
+@media (max-width: 700px) {
+  :root { --pad: 20px; }
+  .header-inner { flex-direction: column; align-items: stretch; gap: 8px; padding-block: 13px 10px; }
+  .site-nav { justify-content: flex-start; gap: 4px; }
+  .site-nav a { min-height: 40px; padding: 7px 12px; font-size: 14px; }
+  .page-shell { padding-block: 32px 56px; }
+  .preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .preview-canvas { height: 128px; }
+  .feature-grid, .graphs-grid, .verdict-grid { grid-template-columns: minmax(0, 1fr); }
+  .stage-panel { grid-template-columns: minmax(0, 1fr); }
+  .koch-canvas { aspect-ratio: auto; height: 72vw; min-height: 250px; max-height: 420px; }
+  .footer-inner { min-height: 68px; flex-wrap: wrap; padding-block: 13px; }
+}
+
+@media (max-width: 480px) {
+  :root { --pad: 16px; }
+  .content-card { padding: 18px; }
+  .site-nav { width: 100%; }
+  .nav-label-full { display: none; }
+  .nav-label-short { display: inline; }
+  .site-nav a { min-width: 0; flex: 1 1 auto; justify-content: center; padding: 7px 8px; font-size: 14px; white-space: normal; line-height: 1.3; text-align: center; }
+  .brand { font-size: 17px; }
+  .brand-mark { width: 31px; height: 31px; }
+  .preview-card figcaption { padding: 9px 10px; }
+  .canvas-controls { gap: 8px; }
+  .button { padding: 8px 12px; font-size: 15px; }
+  .zoom-page .canvas-controls .toggle-control { margin-left: 0; }
+  .stage-panel { padding: 16px; }
+  .equation-panel { padding: 12px 14px; font-size: 17px; }
+  .infinite-sum-panel .math-display { font-size: 15px; }
+  th, td { padding: 9px 6px; }
+  .slider-results, .limit-result-grid, .epsilon-tool { grid-template-columns: minmax(0, 1fr); }
+  .verdict, .limit-result { padding: 18px; }
+  .conclusion-card { padding: 16px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
